@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מציג מודל תלת-ממדי - אטב</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden;
+            /* ! שינוי: ברירת מחדל רקע כהה */
+            background: radial-gradient(circle, #222222 0%, #222222 100%);
+            transition: background 0.5s ease; /* הוספת מעבר חלק לרקע */
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* סגנון לוח הבקרה הראשי */
+        #controlsPanel {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 280px; 
+            direction: rtl;
+            max-height: 95vh; 
+            overflow-y: auto; 
+            z-index: 100;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            /* ! הוספה: מעבר להסתרה */
+            transition: opacity 0.5s ease-out, transform 0.3s ease-out;
+        }
+
+        /* כפתור המבורגר למובייל */
+        #menuButton {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 200;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            /* ! הוספה: מעבר להסתרה */
+            transition: opacity 0.5s ease-out;
+        }
+
+        #menuButton .bar {
+            width: 25px;
+            height: 3px;
+            background-color: #333;
+            margin: 4px 0;
+            transition: 0.3s;
+        }
+        
+        #controlsPanel h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        #controlsPanel div {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* ! הוספה: עיצוב גמיש לפקדי סליידרים */
+        .slider-control {
+            display: flex;
+            flex-direction: row !important; /* שורה */
+            align-items: center; /* מרכוז אנכי */
+            justify-content: space-between; /* רווח בין האלמנטים */
+            margin-bottom: 12px !important;
+        }
+        .slider-label-group {
+            display: flex;
+            flex-direction: column !important; /* עמודה לתווית ולערך */
+            flex-grow: 1; /* תפוס את רוב הרוחב */
+            margin-bottom: 0 !important;
+        }
+        .slider-label-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .slider-control input[type="range"] {
+            width: 100%; /* הסליידר יתפוס את כל הרוחב שהוקצה לו */
+        }
+        .slider-control input[type="checkbox"] {
+            width: auto; /* רוחב אוטומטי לצ'ק בוקס */
+            margin-right: 10px; /* רווח קטן */
+            flex-shrink: 0; /* מנע התכווצות */
+        }
+        .slider-control .anim-label {
+             font-size: 12px;
+             font-weight: bold;
+             color: #337ab7;
+             margin-right: 5px;
+             user-select: none;
+             cursor: pointer;
+        }
+        
+        /* ! הוספה: כפתורי Gemini */
+        #gemini-controls button {
+             width: 100%;
+             padding: 8px;
+             margin-top: 8px;
+             background-color: #007bff;
+             color: white;
+             border: none;
+             border-radius: 5px;
+             cursor: pointer;
+             font-size: 14px;
+             transition: background-color 0.2s;
+        }
+        #gemini-controls button:hover {
+            background-color: #0056b3;
+        }
+        #llm-output {
+            margin-top: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            font-size: 13px;
+            white-space: pre-wrap; /* שומר על עיצוב הטקסט */
+        }
+
+        #controlsPanel label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        #controlsPanel select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        #controlsPanel input[type="range"] {
+            width: 100%;
+        }
+
+        #controlsPanel p {
+            font-size: 12px;
+            color: #555;
+            margin: 0;
+        }
+        
+        /* ! הוספה: סגנון לבוררי צבע */
+        #colorPickersContainer {
+            display: flex;
+            flex-direction: row !important;
+            justify-content: space-around;
+            align-items: center;
+            padding: 5px 0;
+        }
+        #colorPickersContainer input[type="color"] {
+            width: 35px;
+            height: 35px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 2px;
+            cursor: pointer;
+        }
+        
+        /* MOBILE STYLES: מחביא את הפאנל כברירת מחדל ושולט בכפתור */
+        @media (max-width: 768px) {
+            #controlsPanel {
+                width: 90%;
+                right: 5%;
+                top: 60px; /* מתחת לכפתור ההמבורגר */
+                transform: translateY(-100vh); /* מחביא לגמרי את הפאנל */
+                opacity: 0;
+                pointer-events: none; /* מונע לחיצות כשהפאנל סגור */
+                max-height: 85vh;
+            }
+
+            #controlsPanel.open {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: auto;
+            }
+            
+            #menuButton {
+                display: flex; /* הצג במובייל */
+            }
+
+            /* סגירת האנימציה של ההמבורגר */
+            #menuButton.open .bar:nth-child(1) {
+                transform: translateY(7px) rotate(45deg);
+            }
+
+            #menuButton.open .bar:nth-child(2) {
+                opacity: 0;
+            }
+
+            #menuButton.open .bar:nth-child(3) {
+                transform: translateY(-7px) rotate(-45deg);
+            }
+        }
+
+        /* DESKTOP STYLES: מחביא את כפתור ההמבורגר */
+        @media (min-width: 769px) {
+            #menuButton {
+                display: none;
+            }
+            #controlsPanel {
+                transform: translateY(0); /* ודא שהוא גלוי בדסקטופ */
+                opacity: 1;
+                pointer-events: auto;
+            }
+        }
+        
+    </style>
+    
+    <!-- ! הוספת סקריפט גלובלי ל-Cannon.js -->
+    <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+    
+    <!-- שינוי: העברת importmap ל-head כדי לפתור שגיאות ייבוא -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="menuButton">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+    
+    <div id="controlsPanel">
+        <h3>לוח בקרה</h3>
+        
+        <!-- ! הוספה: פקדי אנימציה גלובליים -->
+        <div style="flex-direction: row; align-items: center; justify-content: space-between; border: 1px solid #00000030; padding: 8px; border-radius: 5px;">
+            <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                <div style="display: flex; flex-direction: row; align-items: center;">
+                    <input type="checkbox" id="animateShape" style="width: auto; margin-left: 5px;">
+                    <label for="animateShape" style="margin-bottom: 0; font-weight: bold; font-size: 15px;">הפעל אנימציה (צורה)</label>
+                </div>
+                 <div id="animationSpeedControls" style="display: none; margin-top: 10px;">
+                    <label for="animationSpeed">מהירות סיבוב: <span id="animationSpeedLabel">0.10</span></label>
+                    <input type="range" id="animationSpeed" min="0.01" max="1.0" step="0.01" value="0.10">
+                 </div>
+            </div>
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+        
+        <div class="slider-control">
+            <div class="slider-label-group">
+                <label for="pegCount">מספר אטבים: <span id="pegCountLabel">582</span></label>
+                <input type="range" id="pegCount" min="2" max="1000" value="582">
+            </div>
+            <label class="anim-label" for="animatePegCount">A</label>
+            <input type="checkbox" id="animatePegCount" data-slider-id="pegCount">
+        </div>
+
+        <div class="slider-control">
+            <div class="slider-label-group">
+                <label for="globalScale">קנה מידה גלובלי (אטב): <span id="globalScaleLabel">0.20</span></label>
+                <input type="range" id="globalScale" min="0.1" max="1.0" step="0.05" value="0.20">
+            </div>
+            <label class="anim-label" for="animateGlobalScale">A</label>
+            <input type="checkbox" id="animateGlobalScale" data-slider-id="globalScale">
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+        <!-- ! הוספה: סליידר סיבוב פנימי -->
+        <div class="slider-control">
+            <div class="slider-label-group">
+                <label for="pegTwistSliderX">סיבוב פנימי (ציר X): <span id="pegTwistLabelX">0</span>°</label>
+                <input type="range" id="pegTwistSliderX" min="0" max="360" step="1" value="0">
+            </div>
+            <label class="anim-label" for="animatePegTwistX">A</label>
+            <input type="checkbox" id="animatePegTwistX" data-slider-id="pegTwistSliderX">
+        </div>
+        <div class="slider-control">
+            <div class="slider-label-group">
+                <label for="pegTwistSliderY">סיבוב פנימי (ציר Y): <span id="pegTwistLabelY">0</span>°</label>
+                <input type="range" id="pegTwistSliderY" min="0" max="360" step="1" value="0">
+            </div>
+            <label class="anim-label" for="animatePegTwistY">A</label>
+            <input type="checkbox" id="animatePegTwistY" data-slider-id="pegTwistSliderY">
+        </div>
+        <div class="slider-control">
+            <div class="slider-label-group">
+                <label for="pegTwistSliderZ">סיבוב פנימי (ציר Z): <span id="pegTwistLabelZ">0</span>°</label>
+                <input type="range" id="pegTwistSliderZ" min="0" max="360" step="1" value="0">
+            </div>
+            <label class="anim-label" for="animatePegTwistZ">A</label>
+            <input type="checkbox" id="animatePegTwistZ" data-slider-id="pegTwistSliderZ">
+        </div>
+        
+        <!-- ! הוספה: פלטת צבעים -->
+        <h3>פלטת צבעים (5)</h3>
+        <div id="colorPickersContainer">
+            <input type="color" id="colorPicker1" value="#ff0000">
+            <input type="color" id="colorPicker2" value="#ffc0cb">
+            <input type="color" id="colorPicker3" value="#0000ff">
+            <input type="color" id="colorPicker4" value="#0000ff">
+            <input type="color" id="colorPicker5" value="#ffffff">
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+        
+        <!-- הוספה: פקדי מנורה -->
+        <h3>תאורה</h3>
+        <!-- ! הוספה: סליידר תאורה חיצונית -->
+        <div class="slider-control">
+            <div class="slider-label-group">
+                <label for="ambientLightSlider">עוצמת תאורה חיצונית: <span id="ambientLightLabel">2.0</span></label>
+                <!-- ! שינוי: הגדלת הטווח המקסימלי ל-20.0 -->
+                <input type="range" id="ambientLightSlider" min="0.0" max="20.0" step="0.1" value="2.0">
+            </div>
+             <label class="anim-label" for="animateAmbientLight">A</label>
+            <input type="checkbox" id="animateAmbientLight" data-slider-id="ambientLightSlider">
+        </div>
+        
+        <div>
+            <!-- ! שינוי: עדכון עוצמה התחלתית ל-100000 -->
+            <label for="bulbIntensity">עוצמת אור פנימי (מקסימלית): <span id="bulbIntensityLabel">100000</span></label>
+            <input type="range" id="bulbIntensity" min="100" max="100000" step="100" value="100000">
+        </div>
+        
+        <!-- ! הסרה: סליידר עוצמת זוהר פנימי -->
+        
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+        <h3>פרמטרי מבנה</h3>
+        
+        <div>
+            <label for="constructionMode">מצב קונסטרוקציה:</label>
+            <select id="constructionMode">
+                <option value="torus">טורוס (דונאט)</option> 
+                <option value="chandelier" selected>מטריה תלויה (מורף)</option>
+            </select>
+        </div>
+        
+        <div class="slider-control" id="chandelierControls">
+             <div class="slider-label-group">
+                 <label for="chandelierLiftFactor">גובה/פתיחה: <span id="chandelierLiftFactorLabel">0%</span></label>
+                 <input type="range" id="chandelierLiftFactor" min="0" max="95" step="1" value="0">
+             </div>
+             <label class="anim-label" for="animateChandelierLift">A</label>
+             <input type="checkbox" id="animateChandelierLift" data-slider-id="chandelierLiftFactor">
+        </div>
+
+
+        <!-- הגדרות ספציפיות למצב -->
+
+        <div class="slider-control" id="sphereControls">
+             <div class="slider-label-group">
+                <label for="sphereRadius">פרמטר גודל (רדיוס): <span id="sphereRadiusLabel">20</span></label>
+                <input type="range" id="sphereRadius" min="1" max="27" step="1" value="20">
+             </div>
+             <label class="anim-label" for="animateSphereRadius">A</label>
+             <input type="checkbox" id="animateSphereRadius" data-slider-id="sphereRadius">
+        </div>
+
+        <div class="slider-control" id="torusControls" style="display: none;">
+             <div class="slider-label-group">
+                <label for="torusTubeRadius">רדיוס הצינור: <span id="torusTubeRadiusLabel">5</span></label>
+                <input type="range" id="torusTubeRadius" min="1" max="50" step="1" value="5">
+             </div>
+             <label class="anim-label" for="animateTorusTubeRadius">A</label>
+             <input type="checkbox" id="animateTorusTubeRadius" data-slider-id="torusTubeRadius">
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+        
+        <!-- ! הוספה: פקדי GEMINI -->
+        <h3>✨ Gemini LLM Tools</h3>
+        <div id="gemini-controls">
+            <input type="text" id="colorPrompt" placeholder="Mood: Ocean Sunset" style="width: 100%; padding: 5px; margin-bottom: 8px;">
+            <button id="generateColorsButton" disabled>✨ הצע צבעים (JSON)</button>
+            <button id="generateConceptButton" disabled>✨ צור קונספט (טקסט)</button>
+            <div id="llm-output">...</div>
+        </div>
+        
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { TransformControls } from 'three/addons/controls/TransformControls.js'; 
+        // ! הסרת הייבוא המודולרי של Cannon
+
+        let scene, camera, renderer, controls, raycaster, mouse;
+        
+        // ! הוספה: אורות סביבתיים גלובליים
+        // ! תיקון: אתחול האורות בטווח הגלובלי
+        let hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x888888, 0.2); // ! מתחיל חשוך
+        let directionalLight = new THREE.DirectionalLight(0xffffff, 0.1); // ! מתחיל חשוך
+        
+        // ! הוספה: סליידר עוצמת נורה
+        let bulbIntensitySlider;
+        // ! הסרה: סליידר עוצמת זוהר
+        
+        // ! הוספה: משתנה עוצמת תאורה חיצונית
+        let ambientLightIntensity = 2.0; // ! שינוי: ברירת מחדל 2.0
+
+        
+        let originalPegMesh; 
+        let instancedPeg; 
+        let transformControls; 
+        
+        // ! משתני Cannon.js
+        let world;
+        const NUM_WIRE_SEGMENTS = 20;
+        let wireBodies = [];
+        let handleBody;
+        
+        // ! הוספה: קבוצה ראשית שתכיל את כל חלקי המטריה
+        let chandelierGroup; 
+        
+        // הוספה: משתנים לחוטי המבנה
+        let wireframeMesh; 
+        const wireframeMaterial = new THREE.LineDashedMaterial({ 
+            color: 0xffffff, 
+            linewidth: 3, 
+            dashSize: 5, 
+            gapSize: 5, 
+        });
+        
+        // הוספה: משתנים לחוט המרכזי והגלגלת
+        let centralWireMesh;
+        const centralWireMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 3 }); 
+        let pulleyMesh;
+        let pulleyMesh2;
+        let handleSphereMesh; 
+        let floorMesh, ceilingMesh;
+
+        // הוספה: מנורה ואור נקודתי
+        let bulbMesh;
+        let chandelierLight;
+        
+        // ! הסרה: משתנים לקרני אור
+        
+        // ! הוספה: משתנה לבדיקת גרירת המנורה
+        let isDraggingBulb = false;
+
+        
+        // קבועים עבור המטריה התלויה
+        const CEILING_HEIGHT = 150.0; 
+        const CEILING_HEIGHT_FACTOR = 1.0; 
+        const PULLEY_Y = CEILING_HEIGHT; 
+        const FLOOR_Y = -2.0; 
+        
+        const PULLEY_X = 0.0; 
+        // ! שינוי: הרחקת גלגלת משנית פי 2
+        const PULLEY_Z = 0.0;
+        const PULLEY2_X = 60.0; // ! היה 30.0
+        const PULLEY2_Z = 0.0;
+        const HANGER_X = 0.0; 
+        const HANGER_Z = 0.0;
+        
+        // ! שינוי: יישור הידית מתחת לגלגלת השנייה
+        const HANDLE_X = PULLEY2_X; 
+        const HANDLE_Z = PULLEY2_Z;
+
+        // ! שינוי: הגברת רגישות - צמצום טווח Y
+        const HANDLE_MAX_Y_POSITION = 80.0; // היה 100
+        const HANDLE_MIN_Y_POSITION = 20.0; // היה 5
+        const HANDLE_INITIAL_Y = 80.0; // התחל מהנקודה הגבוהה
+        
+        const tempMatrix = new THREE.Matrix4();
+        const tempColor = new THREE.Color();
+        const tempPosition = new THREE.Vector3(); 
+        // ! הוספה: קווטרניון עזר לסיבוב פנימי
+        const twistQuaternionX = new THREE.Quaternion();
+        const twistQuaternionY = new THREE.Quaternion();
+        const twistQuaternionZ = new THREE.Quaternion();
+
+
+        // ! שינוי: מערך הצבעים נטען עכשיו ב-init מבוררי הצבע
+        let colorSequence = [];
+        const colorSequenceLength = 5; // ! קביעת אורך קבוע
+        
+        const maxInstanceCount = 1000;
+        let currentInstanceCount = 582; 
+        
+        let currentMode = 'chandelier'; 
+        let sphereRadius = 20; 
+        let torusTubeRadius = 5; 
+        let globalScale = 0.20; 
+        let chandelierLiftFactor = 0; 
+        
+        let torusTubeRadiusSlider, torusTubeRadiusLabel;
+        let isTubeRadiusAnimating = false;
+        let clock; 
+        
+        // ! הוספה: משתני אנימציה גלובליים
+        let isShapeAnimating = false;
+        let animationSpeed = 0.1;
+        // ! הוספה: משתנה לסיבוב פנימי
+        let pegTwistX = 0;
+        let pegTwistY = 0;
+        let pegTwistZ = 0;
+        let pegTwistSliderX, pegTwistSliderY, pegTwistSliderZ; 
+        let pegTwistLabelX, pegTwistLabelY, pegTwistLabelZ; 
+        
+        // ! הוספה: משתני בוליאנים לאנימציות
+        let animState = {
+            pegCount: false,
+            globalScale: false,
+            pegTwistSliderX: false, // ! שינוי
+            pegTwistSliderY: false, // ! שינוי
+            pegTwistSliderZ: false, // ! שינוי
+            chandelierLiftFactor: false, // ! שינוי
+            sphereRadius: false,
+            torusTubeRadius: false,
+            ambientLightSlider: false // ! הוספה
+        };
+        
+        // ! הוספה: אוביקט לניהול כיוון האנימציה
+        let animDirection = {};
+        
+        // ! הוספה: טיימר להסתרת התפריט
+        let hideMenuTimer = null;
+
+        
+        const modelURL = 'https://cdn.jsdelivr.net/gh/orengamchi/3d_models_collection@main/peg.glb';
+
+        // ---- הוספה: לוגיקת פיזיקה (Cannon.js) ----
+
+        function setupCannon() {
+            // ! שימוש ב-CANNON.* הגלובלי
+            world = new CANNON.World();
+            world.gravity.set(0, -9.82, 0); 
+            world.broadphase = new CANNON.NaiveBroadphase();
+            world.solver.iterations = 10;
+        }
+
+        function setupPhysicsWire(apexPosition) {
+            if (wireBodies.length > 0) {
+                 wireBodies.forEach(b => world.removeBody(b));
+                 wireBodies = [];
+                 if (handleBody) world.removeBody(handleBody);
+            }
+            
+            const segmentMass = 0.5;
+            const segmentShape = new CANNON.Sphere(0.2);
+            
+            const handleStartPos = new CANNON.Vec3(HANDLE_X, HANDLE_INITIAL_Y, HANDLE_Z); 
+            handleBody = new CANNON.Body({ mass: 5, shape: new CANNON.Sphere(1.2), position: handleStartPos }); 
+            handleBody.type = CANNON.Body.DYNAMIC; 
+            world.addBody(handleBody);
+
+            let previousBody = new CANNON.Body({ mass: 0, shape: new CANNON.Sphere(0.1), position: new CANNON.Vec3(pulleyMesh.position.x, pulleyMesh.position.y, pulleyMesh.position.z) }); 
+            world.addBody(previousBody);
+            
+            let pulley2Body = new CANNON.Body({ mass: 0, shape: new CANNON.Sphere(0.1), position: new CANNON.Vec3(pulleyMesh2.position.x, pulleyMesh2.position.y, pulleyMesh2.position.z) }); 
+            world.addBody(pulley2Body);
+
+            const handleToPulley2Vector = new THREE.Vector3(pulleyMesh2.position.x - HANDLE_X, pulleyMesh2.position.y - HANDLE_INITIAL_Y, pulleyMesh2.position.z - HANDLE_Z);
+            const totalDistance = handleToPulley2Vector.length();
+            
+            const numDynamicSegments = 10; 
+            const segmentDist = totalDistance / numDynamicSegments;
+
+            let currentWireBody = new CANNON.Body({ mass: segmentMass, shape: segmentShape, position: new CANNON.Vec3(HANDLE_X, HANDLE_INITIAL_Y, HANDLE_Z) });
+            world.addBody(currentWireBody);
+            wireBodies.push(currentWireBody);
+            
+            let constraint = new CANNON.DistanceConstraint(handleBody, currentWireBody, segmentDist); 
+            world.addConstraint(constraint);
+            previousBody = currentWireBody;
+
+            for (let i = 1; i < numDynamicSegments; i++) {
+                const fraction = i / numDynamicSegments;
+                const wirePos = new THREE.Vector3().copy(handleStartPos).lerp(pulleyMesh2.position, fraction);
+                
+                currentWireBody = new CANNON.Body({ mass: segmentMass, shape: segmentShape, position: new CANNON.Vec3(wirePos.x, wirePos.y, wirePos.z) }); 
+                world.addBody(currentWireBody);
+                wireBodies.push(currentWireBody);
+                
+                constraint = new CANNON.DistanceConstraint(previousBody, currentWireBody, segmentDist); 
+                world.addConstraint(constraint);
+                previousBody = currentWireBody;
+            }
+
+            constraint = new CANNON.DistanceConstraint(previousBody, pulley2Body, 0.1); 
+            world.addConstraint(constraint);
+        }
+
+        function updateDynamicWireVisuals(apexPosition) {
+            if (!handleSphereMesh || !centralWireMesh || !pulleyMesh || !pulleyMesh2 || wireBodies.length === 0) return;
+            
+            handleSphereMesh.position.copy(handleBody.position);
+            handleSphereMesh.quaternion.copy(handleBody.quaternion);
+
+            const centralVertices = [];
+            const pulleyCenter = pulleyMesh.position;
+            const pulleyCenter2 = pulleyMesh2.position;
+
+            centralVertices.push(pulleyCenter.x, pulleyCenter.y + 5, pulleyCenter.z); 
+            centralVertices.push(pulleyCenter.x, pulleyCenter.y, pulleyCenter.z); 
+            
+            const worldApex = new THREE.Vector3();
+            chandelierGroup.localToWorld(worldApex.copy(apexPosition)); 
+            centralVertices.push(pulleyCenter.x, pulleyCenter.y, pulleyCenter.z);
+            centralVertices.push(worldApex.x, worldApex.y, worldApex.z);
+            
+            centralVertices.push(pulleyCenter.x, pulleyCenter.y, pulleyCenter.z); 
+            centralVertices.push(pulleyCenter2.x, pulleyCenter2.y, pulleyCenter2.z); 
+            centralVertices.push(pulleyCenter2.x, pulleyCenter2.y, pulleyCenter2.z); 
+            
+            for (let i = 0; i < wireBodies.length; i++) {
+                const bodyPos = wireBodies[i].position;
+                centralVertices.push(bodyPos.x, bodyPos.y, bodyPos.z);
+                if (i < wireBodies.length - 1) {
+                    centralVertices.push(bodyPos.x, bodyPos.y, bodyPos.z);
+                }
+            }
+            
+            centralVertices.push(handleBody.position.x, handleBody.position.y, handleBody.position.z);
+            
+            centralWireMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(centralVertices, 3));
+            centralWireMesh.geometry.attributes.position.needsUpdate = true;
+            centralWireMesh.computeLineDistances();
+        }
+
+        // ---- סוף לוגיקת פיזיקה ----
+        
+        function updateBulbPosition(apexPosition) {
+            // ! אם המשתמש גורר את הנורה, אל תעדכן את המיקום שלה
+            if (isDraggingBulb) return;
+            
+            if (bulbMesh && chandelierLight) {
+                // ! חישוב מרכז גיאומטרי (בערך)
+                const R = sphereRadius;
+                const MaxY = PULLEY_Y * CEILING_HEIGHT_FACTOR;
+                
+                // מיקום Y במצב סגור (מרכז הכדור)
+                const P0_Y = R + FLOOR_Y;
+                // מיקום Y במצב פתוח (מרכז הדיסק)
+                const P1_Y = MaxY - R * 0.5; // קצת מתחת לתקרה
+
+                const centerPosition = new THREE.Vector3(0, P0_Y, 0);
+                centerPosition.lerp(new THREE.Vector3(0, P1_Y, 0), chandelierLiftFactor);
+
+                bulbMesh.position.copy(centerPosition);
+                chandelierLight.position.copy(bulbMesh.position);
+                
+                // ! הסרה: עדכון מיקום קרני האור
+                
+                bulbMesh.visible = true;
+            }
+        }
+        
+        function getPegScaleVector() {
+            return new THREE.Vector3(globalScale, globalScale, globalScale);
+        }
+
+        // ! הוספה: פונקציית אנימציית סיבוב
+        function applyShapeRotation(deltaTime) {
+            if (!isShapeAnimating || !instancedPeg) return;
+
+            const rotationAmount = animationSpeed * deltaTime;
+            const rotationQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rotationAmount);
+
+            // סיבוב על ציר Y (גלובלי)
+            if (currentMode === 'chandelier' && chandelierGroup) {
+                chandelierGroup.applyQuaternion(rotationQuaternion);
+            } else if (currentMode === 'torus') {
+                // ! עבור טורוס, מסובבים את האטבים המשוכפלים ישירות
+                // (שים לב: זה לא יסובב את הקבוצה, רק את האטבים)
+                instancedPeg.applyQuaternion(rotationQuaternion);
+            }
+        }
+
+
+        function updatePegPositions() {
+            if (!instancedPeg) return;
+
+            // הסתרה של חוטי המבנה כברירת מחדל
+            if (wireframeMesh) wireframeMesh.visible = false;
+            if (centralWireMesh) centralWireMesh.visible = false; 
+            if (pulleyMesh) pulleyMesh.visible = false; 
+            if (pulleyMesh2) pulleyMesh2.visible = false; 
+            if (handleSphereMesh) handleSphereMesh.visible = false; 
+            if (floorMesh) floorMesh.visible = false;
+            if (ceilingMesh) ceilingMesh.visible = false;
+            if (bulbMesh) bulbMesh.visible = false;
+            if (chandelierLight) chandelierLight.visible = false;
+            // ! הסרה: הסתרת קרניים
+
+
+            if (currentMode === 'torus') { 
+                updateTorusConstruction();
+            } else if (currentMode === 'chandelier') { 
+                updateChandelierConstruction();
+                
+                floorMesh.visible = true;
+                ceilingMesh.visible = true;
+                pulleyMesh.visible = true;
+                pulleyMesh2.visible = true;
+                handleSphereMesh.visible = true;
+                centralWireMesh.visible = true;
+                bulbMesh.visible = true;
+                chandelierLight.visible = true;
+                // ! הסרה: הצגת קרניים
+            } else { 
+                 instancedPeg.count = 0; 
+            }
+            
+            instancedPeg.instanceMatrix.needsUpdate = true;
+            instancedPeg.instanceColor.needsUpdate = true; 
+        }
+
+        function updateTorusConstruction() {
+            if (transformControls) transformControls.detach();
+
+            instancedPeg.count = currentInstanceCount;
+
+            const position = new THREE.Vector3();
+            const quaternion = new THREE.Quaternion();
+            const scale = getPegScaleVector(); 
+            const up = new THREE.Vector3(0, 1, 0);
+            const normal = new THREE.Vector3();
+            const goldenAngle = Math.PI * (3 - Math.sqrt(5)); 
+
+            const mainRadius = sphereRadius; 
+            const tubeRadius = torusTubeRadius; 
+
+            for (let i = 0; i < currentInstanceCount; i++) {
+                const u = (i / currentInstanceCount) * 2 * Math.PI; 
+                const v = goldenAngle * i; 
+
+                const x = (mainRadius + tubeRadius * Math.cos(v)) * Math.cos(u);
+                const y = (mainRadius + tubeRadius * Math.cos(v)) * Math.sin(u);
+                const z = tubeRadius * Math.sin(v);
+                position.set(x, y, z);
+
+                normal.set(
+                    Math.cos(v) * Math.cos(u),
+                    Math.cos(v) * Math.sin(u),
+                    Math.sin(v)
+                ).normalize();
+                
+                if (normal.lengthSq() === 0) normal.set(0,1,0);
+                quaternion.setFromUnitVectors(up, normal);
+
+                // ! הוספה: החלת סיבוב פנימי (Twist)
+                twistQuaternionX.setFromAxisAngle(new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(pegTwistX));
+                twistQuaternionY.setFromAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(pegTwistY));
+                twistQuaternionZ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(pegTwistZ));
+                quaternion.premultiply(twistQuaternionX).premultiply(twistQuaternionY).premultiply(twistQuaternionZ);
+                
+                tempMatrix.compose(position, quaternion, scale);
+                instancedPeg.setMatrixAt(i, tempMatrix);
+
+                const colorIndex = i % colorSequenceLength;
+                tempColor.set(colorSequence[colorIndex]); // ! שימוש במערך הצבעים הדינמי
+                instancedPeg.setColorAt(i, tempColor);
+            }
+        }
+
+        function updateChandelierConstruction() {
+            if (transformControls.object && transformControls.object !== handleSphereMesh && transformControls.object !== chandelierGroup && transformControls.object !== bulbMesh) {
+                 transformControls.detach();
+            }
+
+            instancedPeg.count = currentInstanceCount;
+            
+            // ! הוספה: הצג את חוטי הברזל
+            wireframeMesh.visible = true;
+
+            
+            const position = new THREE.Vector3();
+            const quaternion = new THREE.Quaternion();
+            const scale = getPegScaleVector(); 
+            const up = new THREE.Vector3(0, 1, 0);
+            const goldenAngle = Math.PI * (3 - Math.sqrt(5)); 
+            
+            const R = sphereRadius;
+            const MaxY = PULLEY_Y * CEILING_HEIGHT_FACTOR; 
+            
+            const positionsArray = [];
+            const vertices = [];
+
+            let apexPosition = new THREE.Vector3(0, 0, 0); 
+            const connectionOffset = 0.5 * globalScale; 
+
+            for (let i = 0; i < currentInstanceCount; i++) {
+                
+                const t_linear = i / (currentInstanceCount - 1); 
+                const t_eased = 1 - Math.pow(1 - t_linear, 1.5); 
+
+                const y_norm_i = 1 - t_linear * 2; 
+                const radius_i = Math.sqrt(1 - y_norm_i * y_norm_i) * R;
+                const theta_i = goldenAngle * i;
+                const x_i = Math.cos(theta_i) * radius_i;
+                const z_i = Math.sin(theta_i) * radius_i;
+                const y_i = y_norm_i * R; 
+                
+                const P0 = new THREE.Vector3(x_i, y_i, z_i);
+                P0.add(new THREE.Vector3(0, R + FLOOR_Y, 0)); 
+                
+                const R_disc = R * 3.0; 
+                const r_norm_f = t_eased;
+                const r_f = r_norm_f * R_disc;
+                const theta_f = goldenAngle * i * 3; 
+                
+                const x_f = Math.cos(theta_f) * r_f;
+                const z_f = Math.sin(theta_f) * r_f;
+                const y_f = MaxY; 
+                
+                const P1 = new THREE.Vector3(x_f, y_f, z_f);
+
+                position.copy(P0).lerp(P1, chandelierLiftFactor);
+                
+                // --- חישוב סיבוב ---
+                // מצב התחלה (0%): פונה החוצה מהכדור
+                const normal0 = P0.clone().sub(new THREE.Vector3(0, R + FLOOR_Y, 0)).normalize(); 
+                if (normal0.lengthSq() === 0) normal0.set(0, 1, 0); // מניעת וקטור אפס
+                
+                // ! שינוי: הגדרת יעד הסיבוב למצב "אופקי" (שטיח), פונה פנימה
+                // ! וקטור היעד פונה ממיקום האטב (x_f, z_f) אל המרכז (0, 0)
+                const normal1 = new THREE.Vector3(-x_f, 0, -z_f).normalize();
+                if (normal1.lengthSq() === 0) { // טיפול בנקודת המרכז
+                    normal1.set(0, -1, 0); // אם במרכז, פשוט פנה מטה
+                }
+                
+                const quaternion0 = new THREE.Quaternion().setFromUnitVectors(up, normal0);
+                const quaternion1 = new THREE.Quaternion().setFromUnitVectors(up, normal1);
+                
+                quaternion.copy(quaternion0).slerp(quaternion1, chandelierLiftFactor);
+                
+                // ! הוספה: החלת סיבוב פנימי (Twist)
+                twistQuaternionX.setFromAxisAngle(new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(pegTwistX));
+                twistQuaternionY.setFromAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(pegTwistY));
+                twistQuaternionZ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(pegTwistZ));
+                // ! החלת הסיבובים לאחר ה-SLERP
+                quaternion.premultiply(twistQuaternionX).premultiply(twistQuaternionY).premultiply(twistQuaternionZ);
+
+                
+                tempMatrix.compose(position, quaternion, scale);
+                instancedPeg.setMatrixAt(i, tempMatrix);
+                
+                const colorIndex = i % colorSequenceLength;
+                tempColor.set(colorSequence[colorIndex]); // ! שימוש במערך הצבעים הדינמי
+                instancedPeg.setColorAt(i, tempColor);
+                
+                const connectionPoint = tempPosition.set(0, -connectionOffset, 0).applyQuaternion(quaternion).add(position); 
+                positionsArray.push(connectionPoint.clone()); 
+                
+                if (i > 0) {
+                    vertices.push(positionsArray[i - 1].x, positionsArray[i - 1].y, positionsArray[i - 1].z);
+                    vertices.push(positionsArray[i].x, positionsArray[i].y, positionsArray[i].z);
+                }
+                
+                if (i === 0) {
+                    apexPosition.copy(connectionPoint);
+                }
+            }
+            
+            if (currentInstanceCount > 1) {
+                vertices.push(positionsArray[currentInstanceCount - 1].x, positionsArray[currentInstanceCount - 1].y, positionsArray[currentInstanceCount - 1].z);
+                vertices.push(positionsArray[0].x, positionsArray[0].y, positionsArray[0].z);
+            }
+            
+            wireframeMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            wireframeMesh.geometry.attributes.position.needsUpdate = true;
+            wireframeMesh.computeLineDistances(); 
+            
+            updateDynamicWireVisuals(apexPosition);
+            updateBulbPosition(apexPosition);
+        }
+
+        function init() {
+            clock = new THREE.Clock(); 
+
+            setupCannon();
+
+            scene = new THREE.Scene();
+            scene.background = null;
+            scene.fog = new THREE.Fog(0x222222, 120, 360); 
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            // ! שינוי: מיקום מצלמה ופוקוס
+            camera.position.set(0, 10, 30); 
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setClearAlpha(0.0); 
+            document.body.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.target.set(0, 0, 0); // ! שינוי: פוקוס במרכז
+            controls.maxDistance = Infinity;
+            controls.minDistance = 0.1; // ! שינוי: אפשר זום קרוב
+            
+            chandelierGroup = new THREE.Group();
+            scene.add(chandelierGroup);
+
+
+            const visualPlaneMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x4a4a4a, 
+                metalness: 0.1, 
+                roughness: 0.9, 
+                side: THREE.DoubleSide
+            });
+            
+            const planeGeometry = new THREE.PlaneGeometry(5000, 5000); 
+
+            floorMesh = new THREE.Mesh(planeGeometry, visualPlaneMaterial.clone()); 
+            floorMesh.rotation.x = -Math.PI / 2;
+            floorMesh.position.y = FLOOR_Y; 
+            floorMesh.receiveShadow = true;
+            scene.add(floorMesh);
+
+            const ceilingGeometry = new THREE.CylinderGeometry(100, 100, 1, 64); 
+            ceilingMesh = new THREE.Mesh(ceilingGeometry, visualPlaneMaterial.clone());
+            ceilingMesh.position.y = PULLEY_Y; 
+            ceilingMesh.receiveShadow = true;
+            scene.add(ceilingMesh);
+            
+            hemisphereLight.position.set(0, PULLEY_Y / 2, 0);
+            scene.add(hemisphereLight); 
+
+            directionalLight.position.set(5, PULLEY_Y + 5, 5);
+            directionalLight.castShadow = false; 
+            directionalLight.shadow.mapSize.width = 2048; 
+            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.camera.top = PULLEY_Y + 10;
+            directionalLight.shadow.camera.bottom = FLOOR_Y - 10;
+            directionalLight.shadow.camera.left = -30;
+            directionalLight.shadow.camera.right = 30;
+            directionalLight.shadow.camera.near = 0.1;
+            directionalLight.shadow.camera.far = 100;
+            scene.add(directionalLight);
+            
+            wireframeMesh = new THREE.LineSegments(new THREE.BufferGeometry(), wireframeMaterial);
+            chandelierGroup.add(wireframeMesh); 
+            wireframeMesh.visible = false;
+            
+            centralWireMesh = new THREE.Line(new THREE.BufferGeometry(), centralWireMaterial);
+            scene.add(centralWireMesh);
+            centralWireMesh.visible = false;
+            
+            const hangerGeometry = new THREE.CylinderGeometry(40, 40, 1, 64); 
+            const hangerMesh = new THREE.Mesh(hangerGeometry, visualPlaneMaterial.clone());
+            hangerMesh.position.set(HANGER_X, PULLEY_Y - 0.5, HANGER_Z);
+            hangerMesh.receiveShadow = true;
+            hangerMesh.castShadow = true;
+            scene.add(hangerMesh);
+
+            const pulleyGeometry = new THREE.CylinderGeometry(1.5, 1.5, 1.5, 32); 
+            pulleyGeometry.rotateX(Math.PI / 2);
+            pulleyMesh = new THREE.Mesh(pulleyGeometry, new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.8, roughness: 0.2 }));
+            pulleyMesh.position.set(PULLEY_X, PULLEY_Y - 0.5, PULLEY_Z); 
+            pulleyMesh.castShadow = true;
+            scene.add(pulleyMesh);
+            pulleyMesh.visible = false;
+            
+            pulleyMesh2 = pulleyMesh.clone(); 
+            pulleyMesh2.position.set(PULLEY2_X, PULLEY_Y - 0.5, PULLEY2_Z); 
+            pulleyMesh2.castShadow = true;
+            scene.add(pulleyMesh2);
+            pulleyMesh2.visible = false;
+            
+            const bulbGeometry = new THREE.SphereGeometry(2.0, 16, 16);
+            bulbMesh = new THREE.Mesh(bulbGeometry, new THREE.MeshBasicMaterial({ color: 0xffffff })); 
+            bulbMesh.visible = false;
+            chandelierGroup.add(bulbMesh); 
+            
+            chandelierLight = new THREE.PointLight(0xffffff, 5000, 1000, 2); 
+            chandelierLight.castShadow = true; // ! החזרת הצל
+            chandelierLight.shadow.mapSize.width = 4096; 
+            chandelierLight.shadow.mapSize.height = 4096; 
+            chandelierLight.shadow.camera.near = 0.5;
+            chandelierLight.shadow.camera.far = 1000; 
+            chandelierLight.distance = 1500; 
+            chandelierLight.visible = false;
+            scene.add(chandelierLight);
+
+            // ! הסרה: יצירת קרני אור
+
+
+            const handleGeometry = new THREE.SphereGeometry(2.5, 32, 32); 
+            handleSphereMesh = new THREE.Mesh(handleGeometry, new THREE.MeshStandardMaterial({ color: 0xff0000, metalness: 0.8, roughness: 0.2 })); 
+            handleSphereMesh.castShadow = true;
+            handleSphereMesh.position.set(HANDLE_X, HANDLE_INITIAL_Y, HANDLE_Z); 
+            scene.add(handleSphereMesh);
+            handleSphereMesh.visible = false;
+            
+            transformControls = new TransformControls(camera, renderer.domElement);
+            
+            let isDraggingHandle = false;
+
+            transformControls.addEventListener('dragging-changed', (event) => {
+                controls.enabled = !event.value; 
+                isDraggingHandle = event.value;
+                
+                if (transformControls.object === handleSphereMesh) {
+                     handleBody.type = event.value ? CANNON.Body.KINEMATIC : CANNON.Body.DYNAMIC; 
+                }
+                
+                if (transformControls.object === bulbMesh) {
+                    isDraggingBulb = event.value;
+                }
+            });
+            
+            transformControls.addEventListener('objectChange', () => {
+                if (transformControls.object === handleSphereMesh) {
+                    
+                    handleBody.position.copy(transformControls.object.position);
+                    handleBody.quaternion.copy(transformControls.object.quaternion);
+
+                    const horizontalDistanceSq = (handleSphereMesh.position.x - HANDLE_X) * (handleSphereMesh.position.x - HANDLE_X) + 
+                                                 (handleSphereMesh.position.z - HANDLE_Z) * (handleSphereMesh.position.z - HANDLE_Z);
+                    const horizontalInfluenceFactor = 0.015; 
+
+                    const handleRange = HANDLE_MAX_Y_POSITION - HANDLE_MIN_Y_POSITION;
+                    
+                    let newLiftFactor = 1.0 - ((handleSphereMesh.position.y - HANDLE_MIN_Y_POSITION) / handleRange);
+                    newLiftFactor += horizontalDistanceSq * horizontalInfluenceFactor;
+                    
+                    // ! שינוי: הגבלה ל-95%
+                    chandelierLiftFactor = Math.max(0, Math.min(0.95, newLiftFactor));
+                    
+                    const sliderValue = Math.round(chandelierLiftFactor * 100);
+                    document.getElementById('chandelierLiftFactor').value = sliderValue;
+                    document.getElementById('chandelierLiftFactorLabel').textContent = `${sliderValue}%`;
+                    
+                    updatePegPositions(); 
+                    
+                } else if (currentMode === 'torus') {
+                    updatePegPositions();
+                } else if (currentMode === 'chandelier' && transformControls.object === chandelierGroup) {
+                    isDraggingBulb = false; 
+                    updatePegPositions(); 
+                } 
+                else if (transformControls.object === bulbMesh) {
+                    if (chandelierLight) {
+                        chandelierLight.position.copy(bulbMesh.position);
+                    }
+                }
+            });
+            scene.add(transformControls);
+            
+            window.addEventListener('keydown', (event) => {
+                if (!transformControls) return;
+                switch (event.key) {
+                    case 'r':
+                    case 'R':
+                    case 'ר':
+                        transformControls.setMode('rotate');
+                        break;
+                    case 't':
+                    case 'T':
+                    case 'א':
+                        transformControls.setMode('translate');
+                        break;
+                }
+            });
+            
+            // ! שינוי: חזרה ל-MeshPhysicalMaterial (אטום)
+            const standardMaterial = new THREE.MeshPhysicalMaterial({
+                metalness: 0.8, 
+                roughness: 0.2, 
+                transmission: 0.0, // ! ביטול שקיפות
+                thickness: 0.0,
+                vertexColors: true, // ! שמירה על צבעי האטבים
+                transparent: false, // ! אטום
+                opacity: 1.0,
+                // ! הסרה: פליטת אור 
+            });
+
+            const loader = new GLTFLoader();
+            loader.load(modelURL, (gltf) => {
+                
+                gltf.scene.traverse((child) => {
+                    if (child.isMesh && !originalPegMesh) {
+                        child.material = standardMaterial.clone(); 
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        originalPegMesh = child;
+                    }
+                });
+
+                if (!originalPegMesh) {
+                    console.error("No mesh found in the GLB file. Cannot proceed.");
+                    return;
+                }
+                
+                const instancedMaterial = standardMaterial.clone();
+                instancedMaterial.vertexColors = true; 
+                instancedPeg = new THREE.InstancedMesh(originalPegMesh.geometry, instancedMaterial, maxInstanceCount);
+                instancedPeg.castShadow = true; 
+                instancedPeg.receiveShadow = true;
+                
+                instancedPeg.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(maxInstanceCount * 3), 3); 
+                instancedPeg.geometry.setAttribute('color', instancedPeg.instanceColor);
+                
+                chandelierGroup.add(instancedPeg); 
+
+                if (currentMode === 'chandelier') {
+                    const R = sphereRadius;
+                    const tempApexPos = new THREE.Vector3(0, R + FLOOR_Y, 0);
+                    setupPhysicsWire(tempApexPos); 
+                    
+                    handleSphereMesh.position.set(HANDLE_X, HANDLE_INITIAL_Y, HANDLE_Z);
+                    handleBody.position.set(HANDLE_X, HANDLE_INITIAL_Y, HANDLE_Z);
+                    handleBody.type = CANNON.Body.DYNAMIC; 
+                }
+
+                const initialMode = document.getElementById('constructionMode').value;
+                currentMode = initialMode;
+                
+                currentInstanceCount = parseInt(document.getElementById('pegCount').value);
+                globalScale = parseFloat(document.getElementById('globalScale').value);
+                sphereRadius = parseFloat(document.getElementById('sphereRadius').value);
+                chandelierLiftFactor = parseFloat(document.getElementById('chandelierLiftFactor').value) / 100.0;
+
+
+                document.getElementById('sphereControls').style.display = 'block';
+                document.getElementById('chandelierControls').style.display = 'block';
+
+                updatePegPositions(); 
+                
+                camera.position.set(0, 10, 30); // ! שינוי: מיקום מצלמה
+                controls.target.set(0, 0, 0); // ! שינוי: פוקוס מצלמה
+                controls.update();
+
+            }, undefined, (error) => {
+                console.error('An error happened during loading:', error);
+            });
+
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            window.addEventListener('resize', onWindowResize);
+            
+            // ! הוספה: מאזיני הסתרת תפריט
+            const controlsPanel = document.getElementById('controlsPanel');
+            const menuButton = document.getElementById('menuButton');
+
+            function resetHideTimer() {
+                clearTimeout(hideMenuTimer);
+                controlsPanel.style.opacity = '1';
+                controlsPanel.style.pointerEvents = 'auto';
+                if (window.innerWidth <= 768) { // רק אם כפתור ההמבורגר גלוי
+                     menuButton.style.opacity = '1';
+                     menuButton.style.pointerEvents = 'auto';
+                }
+                
+                hideMenuTimer = setTimeout(hideMenu, 5000);
+            }
+
+            function hideMenu() {
+                if (controlsPanel.classList.contains('open')) {
+                    resetHideTimer(); // אל תסתיר אם התפריט פתוח במובייל
+                    return; 
+                }
+                controlsPanel.style.opacity = '0';
+                controlsPanel.style.pointerEvents = 'none';
+                 if (window.innerWidth <= 768) {
+                    menuButton.style.opacity = '0';
+                    menuButton.style.pointerEvents = 'none';
+                 }
+            }
+
+            window.addEventListener('mousemove', resetHideTimer);
+            controlsPanel.addEventListener('mouseenter', () => clearTimeout(hideMenuTimer));
+            controlsPanel.addEventListener('mouseleave', resetHideTimer);
+            menuButton.addEventListener('click', () => {
+                clearTimeout(hideMenuTimer); // בטל הסתרה אוטומטית בלחיצה
+                controlsPanel.classList.toggle('open');
+                menuButton.classList.toggle('open');
+            });
+            
+            resetHideTimer(); // הפעל טיימר ראשוני
+            
+            document.addEventListener('click', onDocumentClick);
+            document.addEventListener('dblclick', onDocumentDoubleClick); 
+
+            // ---- מאזיני פקדים ----
+
+            const pegCountSlider = document.getElementById('pegCount');
+            const pegCountLabel = document.getElementById('pegCountLabel');
+            
+            const globalScaleSlider = document.getElementById('globalScale'); 
+            const globalScaleLabel = document.getElementById('globalScaleLabel'); 
+            
+            // ! הוספה: מאזין סליידר סיבוב פנימי
+            pegTwistSliderX = document.getElementById('pegTwistSliderX');
+            pegTwistLabelX = document.getElementById('pegTwistLabelX');
+            pegTwistSliderY = document.getElementById('pegTwistSliderY');
+            pegTwistLabelY = document.getElementById('pegTwistLabelY');
+            pegTwistSliderZ = document.getElementById('pegTwistSliderZ');
+            pegTwistLabelZ = document.getElementById('pegTwistLabelZ');
+            
+            function updatePegTwist(axis, value) {
+                if (axis === 'X') pegTwistX = parseFloat(value);
+                if (axis === 'Y') pegTwistY = parseFloat(value);
+                if (axis === 'Z') pegTwistZ = parseFloat(value);
+                document.getElementById(`pegTwistLabel${axis}`).textContent = parseFloat(value).toFixed(0) + "°";
+                updatePegPositions();
+            }
+
+            
+            const modeSelector = document.getElementById('constructionMode');
+            const sphereControls = document.getElementById('sphereControls');
+            const sphereRadiusSlider = document.getElementById('sphereRadius');
+            const sphereRadiusLabel = document.getElementById('sphereRadiusLabel');
+            
+            const torusControls = document.getElementById('torusControls');
+            torusTubeRadiusSlider = document.getElementById('torusTubeRadius');
+            torusTubeRadiusLabel = document.getElementById('torusTubeRadiusLabel');
+            const torusTubeRadiusCheckbox = document.getElementById('animateTorusTubeRadius'); 
+            
+            const chandelierControls = document.getElementById('chandelierControls');
+            const chandelierLiftSlider = document.getElementById('chandelierLiftFactor');
+            const chandelierLiftLabel = document.getElementById('chandelierLiftFactorLabel');
+            
+            bulbIntensitySlider = document.getElementById('bulbIntensity'); 
+            const bulbIntensityLabel = document.getElementById('bulbIntensityLabel');
+            
+            
+            // ! הוספה: מאזינים לבוררי צבע
+            const colorPickers = [
+                document.getElementById('colorPicker1'),
+                document.getElementById('colorPicker2'),
+                document.getElementById('colorPicker3'),
+                document.getElementById('colorPicker4'),
+                document.getElementById('colorPicker5')
+            ];
+            
+            // טעינת צבעים התחלתיים
+            colorSequence = colorPickers.map(picker => picker.value);
+
+            colorPickers.forEach((picker, index) => {
+                picker.addEventListener('input', (event) => {
+                    colorSequence[index] = event.target.value;
+                    updatePegPositions(); // עדכן צבעים מיד
+                });
+            });
+            
+            // ! הוספה: פקדי אנימציה כלליים
+            const animateShapeCheckbox = document.getElementById('animateShape');
+            const animationSpeedSlider = document.getElementById('animationSpeed');
+            const animationSpeedLabel = document.getElementById('animationSpeedLabel');
+            const animationSpeedControlsDiv = document.getElementById('animationSpeedControls');
+            
+            animateShapeCheckbox.addEventListener('change', (event) => {
+                isShapeAnimating = event.target.checked;
+                animationSpeedControlsDiv.style.display = isShapeAnimating ? 'block' : 'none';
+            });
+            
+            animationSpeedSlider.addEventListener('input', (event) => {
+                animationSpeed = parseFloat(event.target.value);
+                animationSpeedLabel.textContent = animationSpeed.toFixed(2);
+            });
+            // סוף הוספת פקדי אנימציה כלליים
+            
+            
+            modeSelector.addEventListener('change', (e) => {
+                currentMode = e.target.value;
+                transformControls.detach(); 
+
+                sphereControls.style.display = 'none';
+                torusControls.style.display = 'none';
+                chandelierControls.style.display = 'none'; 
+                // ! שינוי: הסתר/הצג פקדי אנימציה
+                animationSpeedControlsDiv.style.display = 'none'; 
+                isShapeAnimating = false; 
+                animateShapeCheckbox.checked = false;
+
+
+                
+                if (currentMode === 'torus') { 
+                    sphereControls.style.display = 'block'; 
+                    torusControls.style.display = 'block'; 
+                    animationSpeedControlsDiv.style.display = 'block'; // ! הצג אנימציה
+                } else if (currentMode === 'chandelier') { 
+                    sphereControls.style.display = 'block'; 
+                    chandelierControls.style.display = 'block'; 
+                    animationSpeedControlsDiv.style.display = 'block'; // ! הצג אנימציה
+                    
+                    const R = sphereRadius;
+                    const tempApexPos = new THREE.Vector3(0, R + FLOOR_Y, 0);
+                    setupPhysicsWire(tempApexPos);
+                }
+                
+                updatePegPositions();
+            });
+
+            // ! חיבור לוגיקת אנימציה לסליידרים
+            function setupAnimationBinding(sliderId, labelId, setter) {
+                 const slider = document.getElementById(sliderId);
+                 const label = document.getElementById(labelId);
+                 const checkbox = document.getElementById(`animate${sliderId.charAt(0).toUpperCase() + sliderId.slice(1)}`);
+                 if (!slider) return;
+
+                 // ! חיבור לוגיקת האנימציה
+                 if(checkbox) {
+                      checkbox.addEventListener('change', (event) => {
+                         animState[sliderId] = event.target.checked;
+                         if (event.target.checked) {
+                            animDirection[sliderId] = 1;
+                         }
+                     });
+                 }
+                
+                 slider.addEventListener('input', (event) => {
+                     if (animState[sliderId]) {
+                         animState[sliderId] = false;
+                         if(checkbox) checkbox.checked = false;
+                     }
+                     setter(parseFloat(event.target.value));
+                     
+                     let fixedValue = parseFloat(event.target.value);
+                     if (sliderId.includes('Twist') || sliderId.includes('Radius')) {
+                         fixedValue = fixedValue.toFixed(0);
+                     } else if (sliderId.includes('globalScale') || sliderId.includes('ambientLight')) {
+                          fixedValue = fixedValue.toFixed(1);
+                     } else {
+                         fixedValue = fixedValue.toFixed(0);
+                     }
+
+                     label.textContent = fixedValue + (sliderId.includes('Twist') ? '°' : '');
+                 });
+
+                 // ! הגדרת כיוון התחלתי
+                 animDirection[sliderId] = 1;
+
+                 // קריאה ראשונית
+                 setter(parseFloat(slider.value));
+            }
+
+            setupAnimationBinding('pegCount', 'pegCountLabel', (v) => {
+                currentInstanceCount = parseInt(v, 10);
+                updatePegPositions();
+            });
+            setupAnimationBinding('globalScale', 'globalScaleLabel', (v) => {
+                 globalScale = v;
+                 updatePegPositions();
+            });
+            setupAnimationBinding('pegTwistSliderX', 'pegTwistLabelX', (v) => {
+                pegTwistX = v;
+                updatePegPositions();
+            });
+            setupAnimationBinding('pegTwistSliderY', 'pegTwistLabelY', (v) => {
+                pegTwistY = v;
+                updatePegPositions();
+            });
+            setupAnimationBinding('pegTwistSliderZ', 'pegTwistLabelZ', (v) => {
+                pegTwistZ = v;
+                updatePegPositions();
+            });
+            setupAnimationBinding('sphereRadius', 'sphereRadiusLabel', (v) => {
+                sphereRadius = v;
+                updatePegPositions();
+            });
+            setupAnimationBinding('torusTubeRadius', 'torusTubeRadiusLabel', (v) => {
+                torusTubeRadius = v;
+                updatePegPositions();
+            });
+            setupAnimationBinding('chandelierLiftFactor', 'chandelierLiftFactorLabel', (v) => {
+                const newFactor = parseFloat(v) / 100.0;
+                chandelierLiftFactor = newFactor;
+                
+                updatePegPositions();
+                
+                const handleRange = HANDLE_MAX_Y_POSITION - HANDLE_MIN_Y_POSITION;
+                const newHandleY = HANDLE_MAX_Y_POSITION - (chandelierLiftFactor * handleRange);
+                if (handleBody) {
+                    handleBody.position.y = newHandleY;
+                    handleBody.position.x = HANDLE_X; 
+                    handleBody.position.z = HANDLE_Z;
+                    handleBody.type = CANNON.Body.KINEMATIC; 
+                } else {
+                    handleSphereMesh.position.y = newHandleY;
+                }
+            });
+            
+            // ! הוספה: חיבור אנימציה לסליידר תאורה חיצונית
+            const ambientLightLabel = document.getElementById('ambientLightLabel');
+            const ambientLightSlider = document.getElementById('ambientLightSlider');
+
+            setupAnimationBinding('ambientLightSlider', 'ambientLightLabel', (v) => {
+                ambientLightIntensity = v;
+            });
+            
+            
+            animate();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        
+        function onDocumentClick(event) {
+            if (!instancedPeg || !handleSphereMesh) {
+                return;
+            }
+
+            // ! טיפול בבקרת תפריט
+            const controlsPanel = document.getElementById('controlsPanel');
+            const menuButton = document.getElementById('menuButton');
+             if (document.getElementById('controlsPanel').contains(event.target) || document.getElementById('menuButton').contains(event.target)) {
+                return; 
+            }
+            
+            if (transformControls.dragging) {
+                return; 
+            }
+
+            event.preventDefault();
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            let intersects = [];
+            let selectableObjects = [];
+            
+            if (currentMode === 'torus') {
+                // selectableObjects = [instancedPeg]; // מבוטל
+            } else if (currentMode === 'chandelier') { 
+                selectableObjects = [handleSphereMesh, bulbMesh];
+            }
+            
+            intersects = raycaster.intersectObjects(selectableObjects);
+            
+            if (intersects.length > 0) {
+                const selectedObject = intersects[0].object;
+                
+                if (selectedObject === handleSphereMesh) {
+                    transformControls.attach(selectedObject);
+                    transformControls.setMode('translate');
+                    transformControls.showX = false; 
+                    transformControls.showZ = false;
+                    transformControls.showY = true;
+                } 
+                else if (selectedObject === bulbMesh) {
+                    transformControls.attach(selectedObject);
+                    transformControls.setMode('translate');
+                    transformControls.showX = true;
+                    transformControls.showY = true;
+                    transformControls.showZ = true;
+                }
+            } 
+        }
+
+        function onDocumentDoubleClick(event) {
+             if (document.getElementById('controlsPanel').contains(event.target) || document.getElementById('menuButton').contains(event.target)) {
+                return; 
+            }
+            
+            if (transformControls.dragging) {
+                return; 
+            }
+            
+            transformControls.detach();
+
+            transformControls.showX = true;
+            transformControls.showZ = true;
+            transformControls.showY = true;
+        }
+
+        // ! הוספה: פונקציית אנימציה גלובלית
+        function updateSliderAnimations(deltaTime) {
+            const animationSpeedSlider = document.getElementById('animationSpeed');
+            // ! הגדרת מהירות לפי סליידר סיבוב כללי
+            const baseSpeedFactor = parseFloat(animationSpeedSlider.value) / 0.1; 
+            
+            for (const sliderId in animState) {
+                if (animState[sliderId]) {
+                    const slider = document.getElementById(sliderId);
+                    if (!slider) continue;
+                    
+                    const min = parseFloat(slider.min);
+                    const max = parseFloat(slider.max);
+                    const range = max - min;
+                    
+                    // מהירות מותאמת
+                    let speedPerSecond = (range / 10) * baseSpeedFactor; // לוקח 10 שניות לעבור טווח במהירות 0.1
+                    
+                    let deltaValue = speedPerSecond * deltaTime * (animDirection[sliderId] || 1);
+                    let newValue = parseFloat(slider.value) + deltaValue;
+
+                    if (newValue >= max) {
+                        newValue = max;
+                        animDirection[sliderId] = -1;
+                    }
+                    if (newValue <= min) {
+                        newValue = min;
+                        animDirection[sliderId] = 1;
+                    }
+                    
+                    slider.value = newValue;
+                    // ! הפעלת אירוע input באופן פרוגרמטי
+                    slider.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+        }
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const deltaTime = clock.getDelta(); 
+            
+            if (world && currentMode === 'chandelier') {
+                 world.step(deltaTime);
+            }
+            
+            // ! הוספה: קריאה לאנימציית סיבוב
+            applyShapeRotation(deltaTime);
+            
+            // ! הוספה: קריאה לאנימציית סליידרים
+            updateSliderAnimations(deltaTime);
+
+            
+            if (currentMode === 'chandelier') {
+                const lift = chandelierLiftFactor; 
+                
+                // ! שינוי: שימוש בעוצמת התאורה החיצונית
+                if (hemisphereLight) hemisphereLight.intensity = (0.2 + 1.0 * lift) * ambientLightIntensity; 
+                if (directionalLight) directionalLight.intensity = (0.1 + 0.7 * lift) * ambientLightIntensity; 
+
+                const fogColor = new THREE.Color(0x222222).lerp(new THREE.Color(0x555555), lift);
+                if (scene.fog) scene.fog.color.copy(fogColor);
+                document.body.style.background = `radial-gradient(circle, #${fogColor.getHexString()} 0%, #222222 100%)`;
+
+                if (chandelierLight && bulbIntensitySlider) {
+                    const maxBulbIntensity = parseFloat(bulbIntensitySlider.value);
+                    const bulbIntensity = (1.0 - lift) * maxBulbIntensity + (lift * maxBulbIntensity * 0.2); 
+                    chandelierLight.intensity = bulbIntensity;
+                }
+                
+                // ! הסרה: עדכון עוצמת פליטת אור של אטבים
+                
+
+
+            } else {
+                if (hemisphereLight) hemisphereLight.intensity = 1.2 * ambientLightIntensity;
+                if (directionalLight) directionalLight.intensity = 0.8 * ambientLightIntensity;
+                if (scene.fog) scene.fog.color.set(0x555555);
+                document.body.style.background = `radial-gradient(circle, #555555 0%, #222222 100%)`;
+                if (chandelierLight && bulbIntensitySlider) {
+                    chandelierLight.intensity = parseFloat(bulbIntensitySlider.value);
+                }
+                // ! הסרה: כיבוי זוהר האטבים
+            }
+
+            
+            if (isTubeRadiusAnimating && currentMode === 'torus') {
+                const time = clock.getElapsedTime(); 
+                const minRadius = 1;
+                const maxRadius = 50;
+                const range = maxRadius - minRadius;
+                
+                const newRadius = minRadius + (Math.sin(time * 1.0) + 1) * 0.5 * range; 
+
+                torusTubeRadius = newRadius;
+                
+                if (torusTubeRadiusSlider) torusTubeRadiusSlider.value = newRadius;
+                if (torusTubeRadiusLabel) torusTubeRadiusLabel.textContent = newRadius.toFixed(0);
+                
+                updatePegPositions(); 
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>
