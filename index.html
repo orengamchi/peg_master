@@ -88,7 +88,7 @@
         .slider-label-group {
             display: flex;
             flex-direction: column !important; /* עמודה לתווית ולערך */
-            flex-grow: 1; /* תפוס את רוב הרוחב */
+            flex-grow: 1; /* תפוס את רוחב הרוחב */
             margin-bottom: 0 !important;
         }
         .slider-label-group label {
@@ -268,23 +268,24 @@
         <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
 
         
+        <!-- ! ---- תיקון: החזרת "מספר אטבים" והסרת "קנה מידה" כפול ---- -->
         <div class="slider-control">
             <div class="slider-label-group">
                 <label for="pegCount">מספר אטבים: <span id="pegCountLabel">582</span></label>
                 <input type="range" id="pegCount" min="2" max="1000" value="582">
             </div>
-            <label class="anim-label" for="animatePegCount">A</label>
-            <input type="checkbox" id="animatePegCount" data-slider-id="pegCount">
+            <!-- ! הסרה: כפתור אנימציה -->
         </div>
 
         <div class="slider-control">
             <div class="slider-label-group">
-                <label for="globalScale">קנה מידה גלובלי (אטב): <span id="globalScaleLabel">0.20</span></label>
-                <input type="range" id="globalScale" min="0.1" max="1.0" step="0.05" value="0.20">
+                <label for="globalScale">קנה מידה גלובלי (אטב): <span id="globalScaleLabel">0.1</span></label>
+                <input type="range" id="globalScale" min="0.1" max="1.0" step="0.05" value="0.1">
             </div>
-            <label class="anim-label" for="animateGlobalScale">A</label>
-            <input type="checkbox" id="animateGlobalScale" data-slider-id="globalScale">
+            <!-- ! הסרה: כפתור אנימציה -->
         </div>
+        <!-- ! ---- סוף תיקון ---- -->
+
         
         <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
 
@@ -294,50 +295,69 @@
                 <label for="pegTwistSliderX">סיבוב פנימי (ציר X): <span id="pegTwistLabelX">0</span>°</label>
                 <input type="range" id="pegTwistSliderX" min="0" max="360" step="1" value="0">
             </div>
-            <label class="anim-label" for="animatePegTwistX">A</label>
-            <input type="checkbox" id="animatePegTwistX" data-slider-id="pegTwistSliderX">
+            <label class="anim-label" for="animatePegTwistSliderX">A</label>
+            <!-- ! שינוי: ביטול הפעלת אנימציה כברירת מחדל -->
+            <input type="checkbox" id="animatePegTwistSliderX" data-slider-id="pegTwistSliderX">
         </div>
         <div class="slider-control">
             <div class="slider-label-group">
                 <label for="pegTwistSliderY">סיבוב פנימי (ציר Y): <span id="pegTwistLabelY">0</span>°</label>
                 <input type="range" id="pegTwistSliderY" min="0" max="360" step="1" value="0">
             </div>
-            <label class="anim-label" for="animatePegTwistY">A</label>
-            <input type="checkbox" id="animatePegTwistY" data-slider-id="pegTwistSliderY">
+            <label class="anim-label" for="animatePegTwistSliderY">A</label>
+            <input type="checkbox" id="animatePegTwistSliderY" data-slider-id="pegTwistSliderY">
         </div>
         <div class="slider-control">
             <div class="slider-label-group">
                 <label for="pegTwistSliderZ">סיבוב פנימי (ציר Z): <span id="pegTwistLabelZ">0</span>°</label>
                 <input type="range" id="pegTwistSliderZ" min="0" max="360" step="1" value="0">
             </div>
-            <label class="anim-label" for="animatePegTwistZ">A</label>
-            <input type="checkbox" id="animatePegTwistZ" data-slider-id="pegTwistSliderZ">
+            <label class="anim-label" for="animatePegTwistSliderZ">A</label>
+            <input type="checkbox" id="animatePegTwistSliderZ" data-slider-id="pegTwistSliderZ">
         </div>
         
         <!-- ! הוספה: פלטת צבעים -->
         <h3>פלטת צבעים (5)</h3>
         <div id="colorPickersContainer">
-            <input type="color" id="colorPicker1" value="#ff0000">
-            <input type="color" id="colorPicker2" value="#ffc0cb">
+            <!-- ! שינוי: ערכי צבעים התחלתיים -->
+            <input type="color" id="colorPicker1" value="#ffffff">
+            <input type="color" id="colorPicker2" value="#00ffff">
             <input type="color" id="colorPicker3" value="#0000ff">
-            <input type="color" id="colorPicker4" value="#0000ff">
-            <input type="color" id="colorPicker5" value="#ffffff">
+            <input type="color" id="colorPicker4" value="#ffc0cb">
+            <input type="color" id="colorPicker5" value="#ff0000">
         </div>
         
         <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+        
+        <!-- ! ---- הוספה מחדש: פקדי תאורה ומבנה ---- -->
         
         <!-- הוספה: פקדי מנורה -->
         <h3>תאורה</h3>
         <!-- ! הוספה: סליידר תאורה חיצונית -->
         <div class="slider-control">
             <div class="slider-label-group">
-                <label for="ambientLightSlider">עוצמת תאורה חיצונית: <span id="ambientLightLabel">2.0</span></label>
+                <!-- ! שינוי: ערך התחלתי 11.3 -->
+                <label for="ambientLightSlider">עוצמת תאורה חיצונית: <span id="ambientLightLabel">11.3</span></label>
                 <!-- ! שינוי: הגדלת הטווח המקסימלי ל-20.0 -->
-                <input type="range" id="ambientLightSlider" min="0.0" max="20.0" step="0.1" value="2.0">
+                <!-- ! שינוי: ערך התחלתי 11.3 -->
+                <input type="range" id="ambientLightSlider" min="0.0" max="20.0" step="0.1" value="11.3">
             </div>
-             <label class="anim-label" for="animateAmbientLight">A</label>
-            <input type="checkbox" id="animateAmbientLight" data-slider-id="ambientLightSlider">
+             <!-- ! הסרה: כפתור אנימציה
+             <label class="anim-label" for="animateAmbientLightSlider">A</label>
+            <input type="checkbox" id="animateAmbientLightSlider" data-slider-id="ambientLightSlider">
+            -->
         </div>
+        
+        <!-- ! הוספה: בוררי צבע רקע וערפל -->
+        <div class="slider-control">
+             <label for="fogColorFar" style="margin-left: 10px; margin-bottom: 0;">ערפל/רקע (רחוק):</label>
+             <input type="color" id="fogColorFar" value="#222222" style="width: 50px; height: 30px; padding: 2px; border-radius: 5px;">
+        </div>
+        <div class="slider-control">
+             <label for="fogColorNear" style="margin-left: 10px; margin-bottom: 0;">ערפל/רקע (קרוב):</label>
+             <input type="color" id="fogColorNear" value="#555555" style="width: 50px; height: 30px; padding: 2px; border-radius: 5px;">
+        </div>
+        <!-- ! סוף הוספה -->
         
         <div>
             <!-- ! שינוי: עדכון עוצמה התחלתית ל-100000 -->
@@ -363,8 +383,9 @@
                  <label for="chandelierLiftFactor">גובה/פתיחה: <span id="chandelierLiftFactorLabel">0%</span></label>
                  <input type="range" id="chandelierLiftFactor" min="0" max="95" step="1" value="0">
              </div>
-             <label class="anim-label" for="animateChandelierLift">A</label>
-             <input type="checkbox" id="animateChandelierLift" data-slider-id="chandelierLiftFactor">
+             <!-- ! שינוי: תיקון ID ו-for -->
+             <label class="anim-label" for="animateChandelierLiftFactor">A</label>
+             <input type="checkbox" id="animateChandelierLiftFactor" data-slider-id="chandelierLiftFactor">
         </div>
 
 
@@ -372,8 +393,10 @@
 
         <div class="slider-control" id="sphereControls">
              <div class="slider-label-group">
-                <label for="sphereRadius">פרמטר גודל (רדיוס): <span id="sphereRadiusLabel">20</span></label>
-                <input type="range" id="sphereRadius" min="1" max="27" step="1" value="20">
+                 <!-- ! שינוי: ערך התחלתי 27 -->
+                 <label for="sphereRadius">פרמטר גודל (רדיוס): <span id="sphereRadiusLabel">27</span></label>
+                 <!-- ! שינוי: ערך התחלתי 27 -->
+                 <input type="range" id="sphereRadius" min="1" max="27" step="1" value="27">
              </div>
              <label class="anim-label" for="animateSphereRadius">A</label>
              <input type="checkbox" id="animateSphereRadius" data-slider-id="sphereRadius">
@@ -381,8 +404,8 @@
 
         <div class="slider-control" id="torusControls" style="display: none;">
              <div class="slider-label-group">
-                <label for="torusTubeRadius">רדיוס הצינור: <span id="torusTubeRadiusLabel">5</span></label>
-                <input type="range" id="torusTubeRadius" min="1" max="50" step="1" value="5">
+                 <label for="torusTubeRadius">רדיוס הצינור: <span id="torusTubeRadiusLabel">5</span></label>
+                 <input type="range" id="torusTubeRadius" min="1" max="50" step="1" value="5">
              </div>
              <label class="anim-label" for="animateTorusTubeRadius">A</label>
              <input type="checkbox" id="animateTorusTubeRadius" data-slider-id="torusTubeRadius">
@@ -390,14 +413,17 @@
         
         <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
         
-        <!-- ! הוספה: פקדי GEMINI -->
+        <!-- ! ---- סוף הוספה מחדש ---- -->
+
+        <!-- ! הסרה: פקדי GEMINI
         <h3>✨ Gemini LLM Tools</h3>
         <div id="gemini-controls">
             <input type="text" id="colorPrompt" placeholder="Mood: Ocean Sunset" style="width: 100%; padding: 5px; margin-bottom: 8px;">
-            <button id="generateColorsButton" disabled>✨ הצע צבעים (JSON)</button>
-            <button id="generateConceptButton" disabled>✨ צור קונספט (טקסט)</button>
+            <button id="generateColorsButton">✨ הצע צבעים (JSON)</button>
+            <button id="generateConceptButton">✨ צור קונספט (טקסט)</button>
             <div id="llm-output">...</div>
         </div>
+        -->
         
     </div>
 
@@ -438,16 +464,19 @@
         
         // הוספה: משתנים לחוטי המבנה
         let wireframeMesh; 
-        const wireframeMaterial = new THREE.LineDashedMaterial({ 
+        // ! ---- שינוי: שימוש בקו רציף במקום מקווקו ----
+        // ! ---- שינוי: הגדלת עובי ל-16 (פי 2) ----
+        const wireframeMaterial = new THREE.LineBasicMaterial({ 
             color: 0xffffff, 
-            linewidth: 3, 
-            dashSize: 5, 
-            gapSize: 5, 
+            linewidth: 16 // ! שונה מ-8 ל-16
+            // ! הסרה: dashSize ו-gapSize
         });
+        // ! ---- סוף שינוי ----
         
         // הוספה: משתנים לחוט המרכזי והגלגלת
         let centralWireMesh;
-        const centralWireMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 3 }); 
+        // ! ---- שינוי: הגדלת עובי ל-16 (פי 2) ----
+        const centralWireMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 16 }); // ! שונה מ-8 ל-16
         let pulleyMesh;
         let pulleyMesh2;
         let handleSphereMesh; 
@@ -523,16 +552,17 @@
         let pegTwistLabelX, pegTwistLabelY, pegTwistLabelZ; 
         
         // ! הוספה: משתני בוליאנים לאנימציות
+        // ! שינוי: ביטול הפעלת אנימציית ציר X כברירת מחדל
         let animState = {
-            pegCount: false,
-            globalScale: false,
-            pegTwistSliderX: false, // ! שינוי
-            pegTwistSliderY: false, // ! שינוי
-            pegTwistSliderZ: false, // ! שינוי
-            chandelierLiftFactor: false, // ! שינוי
+            // ! הסרה: pegCount: false,
+            // ! הסרה: globalScale: false,
+            pegTwistSliderX: false, // ! ביטול הפעלה לפי בקשה
+            pegTwistSliderY: false, 
+            pegTwistSliderZ: false, 
+            chandelierLiftFactor: false, 
             sphereRadius: false,
             torusTubeRadius: false,
-            ambientLightSlider: false // ! הוספה
+            // ! הסרה: ambientLightSlider: false
         };
         
         // ! הוספה: אוביקט לניהול כיוון האנימציה
@@ -540,6 +570,19 @@
         
         // ! הוספה: טיימר להסתרת התפריט
         let hideMenuTimer = null;
+ 
+        // ! הוספה: אובייקט לאחסון פונקציות העדכון (setter)
+        let animSetters = {};
+        
+        // ! הוספה: משתנים גלובליים עבור בוררי צבע ופלט LLM
+        let colorPickers = [];
+        // ! הסרה: let llmOutput;
+        
+        // ! הוספה: משתנים לבוררי צבע ערפל
+        let fogColorFarPicker, fogColorNearPicker;
+        let fogColorFar = new THREE.Color("#222222");
+        let fogColorNear = new THREE.Color("#555555");
+
 
         
         const modelURL = 'https://cdn.jsdelivr.net/gh/orengamchi/3d_models_collection@main/peg.glb';
@@ -640,10 +683,38 @@
             
             centralWireMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(centralVertices, 3));
             centralWireMesh.geometry.attributes.position.needsUpdate = true;
-            centralWireMesh.computeLineDistances();
+            // ! ---- שינוי: הסרת computeLineDistances ----
+            // centralWireMesh.computeLineDistances();
+            // ! ---- סוף שינוי ----
         }
 
         // ---- סוף לוגיקת פיזיקה ----
+
+        // ! ---- הוספה: פונקציה ליצירת מפת שקיפות רדיאלית ----
+        function createRadialAlphaMap() {
+            const canvas = document.createElement('canvas');
+            const size = 256;
+            canvas.width = size;
+            canvas.height = size;
+            const context = canvas.getContext('2d');
+            const center = size / 2;
+            
+            const gradient = context.createRadialGradient(center, center, 0, center, center, center);
+            // ! ---- שינוי: גרדיאנט 0-90 אטום, 90-200 שקוף ----
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)'); // מרכז אטום
+            gradient.addColorStop(0.45, 'rgba(255, 255, 255, 1)'); // אטום עד רדיוס 90 (90/200 = 0.45)
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)'); // שקוף בקצה (200)
+            // ! ---- סוף שינוי ----
+            
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, size, size);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.needsUpdate = true;
+            return texture;
+        }
+        // ! ---- סוף הוספה ----
+
         
         function updateBulbPosition(apexPosition) {
             // ! אם המשתמש גורר את הנורה, אל תעדכן את המיקום שלה
@@ -682,14 +753,12 @@
             const rotationAmount = animationSpeed * deltaTime;
             const rotationQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rotationAmount);
 
-            // סיבוב על ציר Y (גלובלי)
-            if (currentMode === 'chandelier' && chandelierGroup) {
+            // ! ---- שינוי: סובב תמיד את הקבוצה המרכזית ----
+            // ! זה יסובב גם את האטבים וגם את חוט הברזל יחד
+            if (chandelierGroup) {
                 chandelierGroup.applyQuaternion(rotationQuaternion);
-            } else if (currentMode === 'torus') {
-                // ! עבור טורוס, מסובבים את האטבים המשוכפלים ישירות
-                // (שים לב: זה לא יסובב את הקבוצה, רק את האטבים)
-                instancedPeg.applyQuaternion(rotationQuaternion);
             }
+            // ! ---- סוף שינוי ----
         }
 
 
@@ -731,10 +800,17 @@
             instancedPeg.instanceColor.needsUpdate = true; 
         }
 
+        // ! ---- תיקון: שחזור הלוגיקה הנכונה של טורוס ----
         function updateTorusConstruction() {
             if (transformControls) transformControls.detach();
 
             instancedPeg.count = currentInstanceCount;
+
+            // ! ---- הוספה: אתחול מערכי חוט הברזל ----
+            const positionsArray = [];
+            const vertices = [];
+            const connectionOffset = 0.5 * globalScale; 
+            // ! ---- סוף הוספה ----
 
             const position = new THREE.Vector3();
             const quaternion = new THREE.Quaternion();
@@ -773,12 +849,39 @@
                 tempMatrix.compose(position, quaternion, scale);
                 instancedPeg.setMatrixAt(i, tempMatrix);
 
+                // ! ---- הוספה: חישוב נקודות חיבור לחוט ברזל ----
+                const connectionPoint = tempPosition.set(0, -connectionOffset, 0).applyQuaternion(quaternion).add(position); 
+                positionsArray.push(connectionPoint.clone()); 
+                
+                if (i > 0) {
+                    vertices.push(positionsArray[i - 1].x, positionsArray[i - 1].y, positionsArray[i - 1].z);
+                    vertices.push(positionsArray[i].x, positionsArray[i].y, positionsArray[i].z);
+                }
+                // ! ---- סוף הוספה ----
+
                 const colorIndex = i % colorSequenceLength;
                 tempColor.set(colorSequence[colorIndex]); // ! שימוש במערך הצבעים הדינמי
                 instancedPeg.setColorAt(i, tempColor);
             }
+
+            // ! ---- הוספה: הרכבת גיאומטריית חוט הברזל ----
+            if (currentInstanceCount > 1) {
+                vertices.push(positionsArray[currentInstanceCount - 1].x, positionsArray[currentInstanceCount - 1].y, positionsArray[currentInstanceCount - 1].z);
+                vertices.push(positionsArray[0].x, positionsArray[0].y, positionsArray[0].z);
+            }
+            
+            if (wireframeMesh) { // ! ודא שהרשת קיימת
+                wireframeMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+                wireframeMesh.geometry.attributes.position.needsUpdate = true;
+                // ! ---- שינוי: הסרת קריאה ל-computeLineDistances ----
+                // wireframeMesh.computeLineDistances(); 
+                // ! ---- סוף שינוי ----
+                wireframeMesh.visible = true; // ! הצג את הרשת
+            }
+            // ! ---- סוף הוספה ----
         }
 
+        // ! ---- תיקון: שחזור הלוגיקה הנכונה של מטריה ----
         function updateChandelierConstruction() {
             if (transformControls.object && transformControls.object !== handleSphereMesh && transformControls.object !== chandelierGroup && transformControls.object !== bulbMesh) {
                  transformControls.detach();
@@ -885,11 +988,15 @@
             
             wireframeMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
             wireframeMesh.geometry.attributes.position.needsUpdate = true;
-            wireframeMesh.computeLineDistances(); 
+            // ! ---- שינוי: הסרת קריאה ל-computeLineDistances ----
+            // wireframeMesh.computeLineDistances(); 
+            // ! ---- סוף שינוי ----
             
             updateDynamicWireVisuals(apexPosition);
             updateBulbPosition(apexPosition);
         }
+        // ! ---- סוף תיקון ----
+
 
         function init() {
             clock = new THREE.Clock(); 
@@ -898,7 +1005,7 @@
 
             scene = new THREE.Scene();
             scene.background = null;
-            scene.fog = new THREE.Fog(0x222222, 120, 360); 
+            scene.fog = new THREE.Fog(fogColorFar.getHex(), 120, 360); // ! שימוש בצבע ערפל
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             // ! שינוי: מיקום מצלמה ופוקוס
@@ -922,24 +1029,37 @@
             chandelierGroup = new THREE.Group();
             scene.add(chandelierGroup);
 
-
-            const visualPlaneMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x4a4a4a, 
-                metalness: 0.1, 
-                roughness: 0.9, 
-                side: THREE.DoubleSide
-            });
+            // ! ---- שינוי: יצירת רצפה עגולה עם שקיפות רדיאלית ----
+            const floorRadius = 200; // ! שונה מ-150 ל-200
+             const floorGeometry = new THREE.CircleGeometry(floorRadius, 64);
             
-            const planeGeometry = new THREE.PlaneGeometry(5000, 5000); 
+            // יצירת מפת שקיפות (אלפא)
+            const alphaMapTexture = createRadialAlphaMap();
 
-            floorMesh = new THREE.Mesh(planeGeometry, visualPlaneMaterial.clone()); 
+            const floorMaterial = new THREE.MeshStandardMaterial({
+                color: 0x4a4a4a,
+                metalness: 0.1,
+                roughness: 0.9,
+                side: THREE.DoubleSide,
+                transparent: true,
+                alphaMap: alphaMapTexture // שימוש במפת השקיפות
+            });
+
+            floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
             floorMesh.rotation.x = -Math.PI / 2;
             floorMesh.position.y = FLOOR_Y; 
             floorMesh.receiveShadow = true;
             scene.add(floorMesh);
+            // ! ---- סוף שינוי רצפה ----
+
 
             const ceilingGeometry = new THREE.CylinderGeometry(100, 100, 1, 64); 
-            ceilingMesh = new THREE.Mesh(ceilingGeometry, visualPlaneMaterial.clone());
+            ceilingMesh = new THREE.Mesh(ceilingGeometry, new THREE.MeshStandardMaterial({ 
+                color: 0x4a4a4a, 
+                metalness: 0.1, 
+                roughness: 0.9, 
+                side: THREE.DoubleSide
+            }));
             ceilingMesh.position.y = PULLEY_Y; 
             ceilingMesh.receiveShadow = true;
             scene.add(ceilingMesh);
@@ -968,7 +1088,12 @@
             centralWireMesh.visible = false;
             
             const hangerGeometry = new THREE.CylinderGeometry(40, 40, 1, 64); 
-            const hangerMesh = new THREE.Mesh(hangerGeometry, visualPlaneMaterial.clone());
+            const hangerMesh = new THREE.Mesh(hangerGeometry, new THREE.MeshStandardMaterial({ 
+                color: 0x4a4a4a, 
+                metalness: 0.1, 
+                roughness: 0.9, 
+                side: THREE.DoubleSide
+            }));
             hangerMesh.position.set(HANGER_X, PULLEY_Y - 0.5, HANGER_Z);
             hangerMesh.receiveShadow = true;
             hangerMesh.castShadow = true;
@@ -1185,8 +1310,8 @@
                 controlsPanel.style.opacity = '0';
                 controlsPanel.style.pointerEvents = 'none';
                  if (window.innerWidth <= 768) {
-                    menuButton.style.opacity = '0';
-                    menuButton.style.pointerEvents = 'none';
+                     menuButton.style.opacity = '0';
+                     menuButton.style.pointerEvents = 'none';
                  }
             }
 
@@ -1248,7 +1373,8 @@
             
             
             // ! הוספה: מאזינים לבוררי צבע
-            const colorPickers = [
+            // ! שינוי: אתחול המשתנה הגלובלי
+            colorPickers = [
                 document.getElementById('colorPicker1'),
                 document.getElementById('colorPicker2'),
                 document.getElementById('colorPicker3'),
@@ -1264,6 +1390,17 @@
                     colorSequence[index] = event.target.value;
                     updatePegPositions(); // עדכן צבעים מיד
                 });
+            });
+
+            // ! הוספה: מאזינים לבוררי צבע ערפל
+            fogColorFarPicker = document.getElementById('fogColorFar');
+            fogColorNearPicker = document.getElementById('fogColorNear');
+            
+            fogColorFarPicker.addEventListener('input', (event) => {
+                fogColorFar.set(event.target.value);
+            });
+            fogColorNearPicker.addEventListener('input', (event) => {
+                fogColorNear.set(event.target.value);
             });
             
             // ! הוספה: פקדי אנימציה כלליים
@@ -1319,36 +1456,58 @@
             function setupAnimationBinding(sliderId, labelId, setter) {
                  const slider = document.getElementById(sliderId);
                  const label = document.getElementById(labelId);
+                 
+                 // ! ---- שינוי ----
+                 // ! חיפוש תיבת הסימון לפי ה-ID החדש והפשוט יותר
                  const checkbox = document.getElementById(`animate${sliderId.charAt(0).toUpperCase() + sliderId.slice(1)}`);
+                 // ! ---- סוף שינוי ----
+
                  if (!slider) return;
+
+                 // ! הוספה: שמירת ה-setter הגלובלי
+                 animSetters[sliderId] = setter;
 
                  // ! חיבור לוגיקת האנימציה
                  if(checkbox) {
-                      checkbox.addEventListener('change', (event) => {
-                         animState[sliderId] = event.target.checked;
-                         if (event.target.checked) {
-                            animDirection[sliderId] = 1;
-                         }
-                     });
+                       // ! ---- שינוי ----
+                       // ! שימוש ב-sliderId שהועבר לפונקציה, כי הוא הנכון
+                       checkbox.addEventListener('change', (event) => {
+                           // ! שינוי: שימוש ב- data-slider-id
+                           const targetSliderId = event.target.dataset.sliderId;
+                           animState[targetSliderId] = event.target.checked; 
+                           if (event.target.checked) {
+                             animDirection[targetSliderId] = 1; 
+                           }
+                       });
+                       // ! ---- סוף שינוי ----
                  }
                 
                  slider.addEventListener('input', (event) => {
-                     if (animState[sliderId]) {
-                         animState[sliderId] = false;
-                         if(checkbox) checkbox.checked = false;
-                     }
-                     setter(parseFloat(event.target.value));
-                     
-                     let fixedValue = parseFloat(event.target.value);
-                     if (sliderId.includes('Twist') || sliderId.includes('Radius')) {
-                         fixedValue = fixedValue.toFixed(0);
-                     } else if (sliderId.includes('globalScale') || sliderId.includes('ambientLight')) {
-                          fixedValue = fixedValue.toFixed(1);
-                     } else {
-                         fixedValue = fixedValue.toFixed(0);
-                     }
+                       if (animState[sliderId]) {
+                           animState[sliderId] = false;
+                           if(checkbox) checkbox.checked = false;
+                       }
+                       setter(parseFloat(event.target.value));
+                       
+                       let fixedValue = parseFloat(event.target.value);
+                       if (sliderId.includes('Twist') || sliderId.includes('Radius')) {
+                           fixedValue = fixedValue.toFixed(0);
+                       } else if (sliderId.includes('globalScale') || sliderId.includes('ambientLight')) {
+                            fixedValue = fixedValue.toFixed(1);
+                       } else {
+                           fixedValue = fixedValue.toFixed(0);
+                       }
 
-                     label.textContent = fixedValue + (sliderId.includes('Twist') ? '°' : '');
+                       if(label) { // ! הוספת בדיקה אם התווית קיימת
+                           // ! שינוי: שימוש ב-querySelector במקום ב-ID ישיר של התווית
+                           const labelSpan = document.querySelector(`label[for="${sliderId}"] span`);
+                           if (labelSpan) {
+                               let suffix = '';
+                               if (sliderId.includes('Twist')) suffix = '°';
+                               if (sliderId.includes('chandelierLiftFactor')) suffix = '%';
+                               labelSpan.textContent = fixedValue + suffix;
+                           }
+                       }
                  });
 
                  // ! הגדרת כיוון התחלתי
@@ -1408,10 +1567,23 @@
             const ambientLightLabel = document.getElementById('ambientLightLabel');
             const ambientLightSlider = document.getElementById('ambientLightSlider');
 
+            // ! שינוי: עדכון הפונקציה להתמודד עם תווית שאולי חסרה
             setupAnimationBinding('ambientLightSlider', 'ambientLightLabel', (v) => {
                 ambientLightIntensity = v;
             });
             
+            // ! הוספה: קריאה ל-setupAnimationBinding גם עבור עוצמת הנורה (ללא תווית)
+             setupAnimationBinding('bulbIntensity', 'bulbIntensityLabel', (v) => {
+                 // הפונקציה setter נקראת, אבל אין צורך בעדכון תווית מיוחד
+                 // הערך נקרא ישירות בלולאת האנימציה
+             });
+            
+            // ! הסרה: חיבור מאזינים לכפתורי Gemini
+            /*
+            llmOutput = document.getElementById('llm-output');
+            document.getElementById('generateColorsButton').addEventListener('click', generateColors);
+            document.getElementById('generateConceptButton').addEventListener('click', generateConcept);
+            */
             
             animate();
         }
@@ -1432,8 +1604,8 @@
             const controlsPanel = document.getElementById('controlsPanel');
             const menuButton = document.getElementById('menuButton');
              if (document.getElementById('controlsPanel').contains(event.target) || document.getElementById('menuButton').contains(event.target)) {
-                return; 
-            }
+                 return; 
+             }
             
             if (transformControls.dragging) {
                 return; 
@@ -1477,11 +1649,11 @@
         }
 
         function onDocumentDoubleClick(event) {
-             if (document.getElementById('controlsPanel').contains(event.target) || document.getElementById('menuButton').contains(event.target)) {
-                return; 
-            }
+           if (document.getElementById('controlsPanel').contains(event.target) || document.getElementById('menuButton').contains(event.target)) {
+                 return; 
+             }
             
-            if (transformControls.dragging) {
+             if (transformControls.dragging) {
                 return; 
             }
             
@@ -1523,8 +1695,34 @@
                     }
                     
                     slider.value = newValue;
-                    // ! הפעלת אירוע input באופן פרוגרמטי
-                    slider.dispatchEvent(new Event('input', { bubbles: true }));
+                    
+                    // ! ---- שינוי ----
+                    // ! במקום להפעיל אירוע 'input', נקרא ישירות ל-setter ולעדכון התווית
+                    // ! זה מונע את הלולאה הלוגית שכיבתה את האנימציה
+                    if (animSetters[sliderId]) {
+                        animSetters[sliderId](newValue);
+                    }
+                    
+                    // עדכון התווית
+                    // ! שינוי: שימוש ב-querySelector לבחירת ה-span שבתוך ה-label
+                    const labelSpan = document.querySelector(`label[for="${sliderId}"] span`);
+                    if (labelSpan) {
+                        let fixedValue = newValue;
+                        if (sliderId.includes('Twist') || sliderId.includes('Radius') || sliderId.includes('chandelierLiftFactor')) {
+                             fixedValue = fixedValue.toFixed(0);
+                        } else if (sliderId.includes('globalScale') || sliderId.includes('ambientLight')) {
+                             fixedValue = fixedValue.toFixed(1);
+                        } else {
+                             fixedValue = fixedValue.toFixed(0);
+                        }
+                        
+                        let suffix = '';
+                        if (sliderId.includes('Twist')) suffix = '°';
+                        if (sliderId.includes('chandelierLiftFactor')) suffix = '%';
+
+                        labelSpan.textContent = fixedValue + suffix;
+                    }
+                    // ! ---- סוף שינוי ----
                 }
             }
         }
@@ -1553,9 +1751,10 @@
                 if (hemisphereLight) hemisphereLight.intensity = (0.2 + 1.0 * lift) * ambientLightIntensity; 
                 if (directionalLight) directionalLight.intensity = (0.1 + 0.7 * lift) * ambientLightIntensity; 
 
-                const fogColor = new THREE.Color(0x222222).lerp(new THREE.Color(0x555555), lift);
+                // ! שינוי: שימוש בבוררי צבע לערפל ולרקע
+                const fogColor = fogColorFar.clone().lerp(fogColorNear, lift);
                 if (scene.fog) scene.fog.color.copy(fogColor);
-                document.body.style.background = `radial-gradient(circle, #${fogColor.getHexString()} 0%, #222222 100%)`;
+                document.body.style.background = `radial-gradient(circle, #${fogColor.getHexString()} 0%, #${fogColorFar.getHexString()} 100%)`;
 
                 if (chandelierLight && bulbIntensitySlider) {
                     const maxBulbIntensity = parseFloat(bulbIntensitySlider.value);
@@ -1564,15 +1763,19 @@
                 }
                 
                 // ! הסרה: עדכון עוצמת פליטת אור של אטבים
-                
+ 
 
-
-            } else {
+            } else { // מצב 'torus'
                 if (hemisphereLight) hemisphereLight.intensity = 1.2 * ambientLightIntensity;
                 if (directionalLight) directionalLight.intensity = 0.8 * ambientLightIntensity;
-                if (scene.fog) scene.fog.color.set(0x555555);
-                document.body.style.background = `radial-gradient(circle, #555555 0%, #222222 100%)`;
+                
+                // ! שינוי: שימוש בבוררי צבע לערפל ולרקע
+                const fogColor = fogColorNear.clone(); // שימוש בצבע הקרוב הקבוע
+                if (scene.fog) scene.fog.color.copy(fogColor);
+                document.body.style.background = `radial-gradient(circle, #${fogColor.getHexString()} 0%, #${fogColorFar.getHexString()} 100%)`;
+
                 if (chandelierLight && bulbIntensitySlider) {
+                    // ! שינוי: בדיקה ש-bulbIntensitySlider אינו null
                     chandelierLight.intensity = parseFloat(bulbIntensitySlider.value);
                 }
                 // ! הסרה: כיבוי זוהר האטבים
